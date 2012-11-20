@@ -6,6 +6,7 @@ use Carp;
 use base 'Exporter';
 use Dancer::Config 'setting';
 use Dancer::Hook;
+use Dancer::Factory::Hook;
 use Dancer::Exception qw(:all);
 
 use base 'Exporter';
@@ -16,6 +17,10 @@ use vars qw(@EXPORT);
   register
   register_plugin
   plugin_setting
+  register_hook
+  execute_hooks
+  execute_hook
+  plugin_args
 );
 
 sub register($&);
@@ -24,11 +29,28 @@ my $_keywords = {};
 
 sub add_hook { Dancer::Hook->new(@_) }
 
+sub plugin_args { (undef, @_) }
+
 sub plugin_setting {
     my $plugin_orig_name = caller();
     (my $plugin_name = $plugin_orig_name) =~ s/Dancer::Plugin:://;
 
     return setting('plugins')->{$plugin_name} ||= {};
+}
+
+sub register_hook {
+    Dancer::Factory::Hook->instance->install_hooks(@_);
+}
+
+sub execute_hooks {
+    Dancer::Deprecation->deprecated(reason => "use 'execute_hook'",
+                                    version => '1.3098',
+                                    fatal => 0);
+    Dancer::Factory::Hook->instance->execute_hooks(@_);
+}
+
+sub execute_hook {
+    Dancer::Factory::Hook->instance->execute_hooks(@_);
 }
 
 sub register($&) {
@@ -157,6 +179,22 @@ module).
 
 A Dancer plugin inherits from Dancer::Plugin and Exporter transparently.
 
+=item B<register_hook>
+
+Allows a plugin to declare a list of supported hooks. Any hook declared like so
+can be executed by the plugin with C<execute_hooks>.
+
+    register_hook 'foo'; 
+    register_hook 'foo', 'bar', 'baz'; 
+
+=item B<execute_hooks>
+
+Allows a plugin to execute the hooks attached at the given position
+
+    execute_hooks 'some_hook';
+
+The hook must have been registered by the plugin first, with C<register_hook>.
+
 =item B<plugin_setting>
 
 Configuration for plugin should be structured like this in the config.yml of
@@ -177,6 +215,21 @@ for B<Dancer::Plugin::Foo::Bar>, use:
   plugins:
     "Foo::Bar":
       key: value
+
+
+=item B<plugin_args>
+
+To easy migration and interoperability between Dancer 1 and Dancer 2
+you can use this method to obtain the arguments or parameters passed
+to a plugin-defined keyword. Although not relevant for Dancer 1 only,
+or Dancer 2 only, plugins, it is useful for universal plugins.
+
+  register foo => sub {
+     my ($self, @args) = plugin_args(@_);
+     ...
+  }
+
+Note that Dancer 1 will return undef as the object reference.
 
 =back
 

@@ -1,9 +1,129 @@
 {{$NEXT}}
 
+1.3110      06.10.2012
+
+    [ BUG FIXES ]
+    * GH #817, #823, #825: Removing Clone from core. Pure-perl environments
+      supported again (Sawyer X).
+    * GH #755, #819, #827, #828: HTTP::Headers accepted by dancer_response
+      (Roberto Patriarca, Dagfinn Ilmari Mannsåker, draxil, perlpong).
+
+    [ ENHANCEMENTS ]
+    * GH #826: The version of wallflower shipped with Dancer has been removed.
+      It was well out of date.  BooK is now maintaining it as a more general
+      solution under the name App::Wallflower. (BooK)
+    * GH #834: Provide empty Headers object if not defined (Yanick Champoux).
+    * GH #840, #841: Dancer::Plugin::Ajax now has content_type (Lee Carmichael).
+
+    [ DOCUMENTATION ]
+    * GH #821: Pointing to new homepage (alfie).
+    * GH #822: Typos in documentation (Stefan Hornburg - racke).
+    * GH #824: Fix in Dancer/Session.pm (pdl).
+    * GH #830: Fix Github links to https:// (Olivier Mengué).
+    * GH #838: Error in Dancer::Plugin::Ajax Documentation (Lee Carmichael).
+    * GH #839: Typo (goblin).
+
+1.3100      25.08.2012
+
+    [ BUG FIXES ]
+    * GH #816: Improve wording when failed to load engine. (Sawyer X)
+    * GH #817: Fix CODE reference uncloned using Clone::clone.
+      (David Previous, Sawyer X)
+
+    [ ENHANCEMENTS ]
+    * GH #755: HTTP::Headers accepted by dancer_response. (Roberto Patriarca)
+
+    [ DOCUMENTATION ]
+    * GH #818: Use "MyWeb::App" instead of "mywebapp" in examples. (pdl)
+
+1.3099      11.08.2012
+
+    [ BUG FIXES ]
+    * GH #683: Fix uninitialized warnings. (Sawyer X)
+    * GH #700: Take into account the app name in route caching. (Perlover)
+    * GH #775: Clone variables for templates.
+      (Reported by Wanradt Koell, fixed by David Precious, Sawyer X)
+    * GH #776: get should be default to get/head even it's inside any.
+      (Fayland Lam)
+    * GH #788: Make sure ID key in sessions are clobbered. (kocoureasy)
+    * Fix uninitialized variables in config file path. (Sawyer X)
+    * GH #809: Require all necessarily modules in Dancer::Config.
+      (John Wittkoski)
+
+    [ ENHANCEMENTS ]
+    * GH #799: New test function: response_redirect_location_is. (Martin Schut)
+    * send_file now accepts an IO::Scalar. (David Precious)
+    * Clean up $VERSION. (Damien Krotkine)
+
+    [ DOCUMENTATION ]
+    * GH #784: Synopsis fix in Dancer::Error. (Alex C)
+    * Document session_domain in Dancer::Config. (David Precious)
+    * Pod fixes in abstract session. (David Precious)
+    * Synopsis fix in Dancer::Test. (Stefan Hornburg <Racke>)
+
+1.3098      28.07.2012
+
+    [ ENHANCEMENTS ]
+    * New keyword 'plugin_args' exported by Dancer::Plugin to provide
+      a consistent way with Dancer 2 to obtain arguments from a plugin
+      keyword. (Alberto Simões).
+    * Add 'execute_hook' and deprecate 'execute_hooks' for homogeneity
+      with Dancer 2.
+    * send_file will do the right thing if given an IO::Scalar object
+      (David Precious, prompted by Ilya Chesnokov).
+
+    [ DOCUMENTATION ]
+    * Fix escaping on some docs (Stefan Hornburg @racke).
+
+1.3097      08.07.2012
+
+    [ ENHANCEMENTS ]
+    * New keywords 'register_hook' and 'execute_hooks' exported by
+      Dancer::Plugin to provide a consistent way with Dancer 2 to declare and
+      run hooks from within a plugin (Alexis Sukrieh, idea from David Precious).
+
+1.3096      06.07.2012
+    ** Codename: Chop Hooey // Neil Hooey **
+
+    [ ENHANCEMENTS ]
+    * Finally released, thanks to Neil Hooey bugging my sorry ass.
+
+1.3095_02   03.07.2012
+
+    [ BUG FIXES ]
+    * fix exception tests in some cases (GH #734) (Damien Krotkine & katkad )
+
+    [ ENHANCEMENTS ]
+    * If YAML does not load, Dancer::Config now reports why (Ovid)
+
+    [ DOCUMENTATION ]
+    * Clarify serialization in introduction POD (Mark A. Stratman)
+    * Typo fix (Sam Kington)
+
+1.3095_01   22.06.2012
+
+    [ BUG FIXES ]
+    * Don't assume returned references are blessed when considering
+      continuations (Neil Hooey, GH-778)
+    * Malformed/missing cookies caused warnings 
+      (James Aitken/LoonyPandora, GH-782 and GH-783)
+    * Avoid potential crash in t/14_serializer/06_api.t if tmp dir is replaced
+      when %ENV gets cleared (Adam Kennedy)
+    * Properly initialize %callbacks to default empty hashref  in _send_file if 
+      not provided (Gary Mullen)
+
     [ ENHANCEMENTS ]
     * Add UTC timestamp options for logger_format (Alex C - perlpong).
     * Tests can now run in parallel (Richard Simões).
     * dancer_version keyword added (Damien "dams" Krotkine).
+    * New session_domain paramter allows you to set the domain of the default
+      session cookie (William Wolf)
+
+    [ DOCUMENTATION ]
+    * Update Ubic service example (Vyacheslav Matyukhin)
+    * Silly typo fixing (Paul Fenwick)
+    * Typo in Dancer::Test file upload example (Jonathan "Duke" Leto)
+    * UTF-8 fixes in POD (ambs)
 
 1.3095      01.04.2012
 

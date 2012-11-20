@@ -28,17 +28,21 @@ sub settings {$SETTINGS}
 my $setters = {
     logger => sub {
         my ($setting, $value) = @_;
+        require Dancer::Logger;
         Dancer::Logger->init($value, settings());
     },
     log_file => sub {
+        require Dancer::Logger;
         Dancer::Logger->init(setting("logger"), setting());
     },
     session => sub {
         my ($setting, $value) = @_;
+        require Dancer::Session;
         Dancer::Session->init($value, settings());
     },
     template => sub {
         my ($setting, $value) = @_;
+        require Dancer::Template;
         Dancer::Template->init($value, settings());
     },
     route_cache => sub {
@@ -158,7 +162,11 @@ sub init_confdir {
 
 sub init_envdir {
     return setting('envdir') if setting('envdir');
-    setting envdir => $ENV{DANCER_ENVDIR} || path(setting('appdir'), 'environments');
+    my $appdirpath = defined setting('appdir')                 ?
+                     path( setting('appdir'), 'environments' ) :
+                     path('environments');
+
+    setting envdir => $ENV{DANCER_ENVDIR} || $appdirpath;
 }
 
 sub load {
@@ -169,8 +177,10 @@ sub load {
     return 1 unless -f conffile;
 
     # load YAML
-    confess "Configuration file found but YAML is not installed"
-      unless Dancer::ModuleLoader->load('YAML');
+    my ( $result, $error ) = Dancer::ModuleLoader->load('YAML');
+    if ( not $result ) {
+        confess "Configuration file found but could not load YAML: $error";
+    }
 
     if (!$_LOADED{conffile()}) {
         load_settings_from_yaml(conffile);
@@ -585,6 +595,13 @@ only be sent over HTTPS connections.
 This setting defaults to 1 and instructs the session cookie to be
 created with the C<HttpOnly> option active, meaning that JavaScript
 will not be able to access to its value.
+
+=head3 session_domain
+
+Allows you to set the domain property on the cookie, which will
+override the default.  This is useful for setting the session cookie's
+domain to something like C<.domain.com> so that the same cookie will
+be applicable and usable across subdomains of a base domain.
 
 
 =head2 auto_page (boolean)

@@ -43,6 +43,7 @@ use vars '@EXPORT';
   response_is_file
   response_headers_are_deeply
   response_headers_include
+  response_redirect_location_is
 
   dancer_response
   get_response
@@ -259,6 +260,15 @@ sub response_headers_include {
     return $tb->ok(_include_in_headers($response->headers_to_array, $expected), $test_name);
 }
 
+sub response_redirect_location_is {
+    my ($req, $expected, $test_name) = @_;
+    $test_name ||= "redirect location looks good for @$req";
+    my $tb = Test::Builder->new;
+
+    my $response = _req_to_response($req);
+    return  $tb->is_eq($response->header('location'), $expected, $test_name);
+}
+
 
 # make sure the given header sublist is included in the full headers array
 sub _include_in_headers {
@@ -343,17 +353,16 @@ Content-Type: text/plain
 
     my ($params, $body, $headers) = @$args{qw(params body headers)};
 
-    if ($headers and (my @headers = @$headers)) {
-        while (my $h = shift @headers) {
-            if ($h =~ /content-type/i) {
-                $ENV{'CONTENT_TYPE'} = shift @headers;
-            }
-        }
+    $headers = HTTP::Headers->new(@{$headers||[]})
+        unless _isa($headers, "HTTP::Headers");
+
+    if ($headers->header('Content-Type')) {
+        $ENV{'CONTENT_TYPE'} = $headers->header('Content-Type');
     }
 
     my $request = Dancer::Request->new_for_request(
         $method => $path,
-        $params, $body, HTTP::Headers->new(@$headers)
+        $params, $body, $headers
     );
 
     # first, reset the current state
@@ -413,7 +422,7 @@ __END__
 
 Dancer::Test - Test helpers to test a Dancer application
 
-=head1 SYNOPSYS
+=head1 SYNOPSIS
 
     use strict;
     use warnings;
@@ -550,6 +559,13 @@ Asserts that the response headers data structure includes some of the defined on
 
     response_headers_include [GET => '/'], [ 'Content-Type' => 'text/plain' ];
 
+=head2 response_redirect_location_is([$method, $path], $expected, $test_name)
+
+Asserts that the location header send with a 302 redirect equals to the C<$expected>
+location.
+
+    response_redirect_location_is [GET => '/'], 'http://localhost/index.html';
+
 =head2 dancer_response($method, $path, { params => $params, body => $body, headers => $headers, files => [{filename => '/path/to/file', name => 'my_file'}] })
 
 Returns a Dancer::Response object for the given request.
@@ -584,7 +600,7 @@ It's possible to test file uploads:
 In addition, you can supply the file contents as the C<data> key:
 
     my $data  = 'A test string that will pretend to be file contents.';
-    $response = dancer_reponse(POST => '/upload', {
+    $response = dancer_response(POST => '/upload', {
         files => [{name => 'test', filename => "filename.ext", data => $data}]
     });
 

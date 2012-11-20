@@ -5,8 +5,10 @@ use warnings;
 use Carp;
 use Cwd 'realpath';
 
-our $VERSION   = '1.3095';
+our $VERSION   = '1.3110';
 our $AUTHORITY = 'SUKRIA';
+
+$VERSION = eval $VERSION;
 
 use Dancer::App;
 use Dancer::Config;
@@ -36,6 +38,7 @@ use Dancer::Continuation::Route::FileSent;
 use Dancer::Continuation::Route::Templated;
 
 use File::Spec;
+use Scalar::Util;
 
 use base 'Exporter';
 
@@ -380,6 +383,11 @@ sub _send_file {
         $request->content_type($options{content_type});
     }
 
+    # If we're given an IO::Scalar object, DTRT (take the scalar ref from it)
+    if (Scalar::Util::blessed($path) && $path->isa('IO::Scalar')) {
+        $path = $path->sref;
+    }
+
     my $resp;
     if (ref($path) eq "SCALAR") {
         # send_data
@@ -408,7 +416,7 @@ sub _send_file {
             my ( $status, $headers ) = @_;
             my %callbacks = defined $options{'callbacks'} ?
                             %{ $options{'callbacks'} }    :
-                            {};
+                            ();
 
             return sub {
                 my $respond = shift;
@@ -1155,7 +1163,7 @@ commonly-used methods are summarized below:
 
 I<This method should be called from a route handler>.
 It's an alias for the L<Dancer::Request params accessor|Dancer::Request/"params">. It returns
-an hash reference to all defined parameters. Check C<param> bellow to access quickly to a single
+an hash reference to all defined parameters. Check C<param> below to access quickly to a single
 parameter value.
 
 =head2 param
@@ -1434,7 +1442,7 @@ it:
             streaming => 1,
             callbacks => {
                 around => sub {
-                    my ( $writer, $content 0 = shift;
+                    my ( $writer, $content ) = @_;
 
                     # we know it's a text file, so we'll just stream
                     # line by line
@@ -1857,8 +1865,9 @@ see the AUTHORS file that comes with this distribution for details.
 =head1 SOURCE CODE
 
 The source code for this module is hosted on GitHub
-L<http://github.com/sukria/Dancer>.  Feel free to fork the repository and submit
-pull requests!  (See L<Dancer::Development> for details on how to contribute).
+L<https://github.com/sukria/Dancer>.  Feel free to fork the repository and
+submit pull requests!  (See L<Dancer::Development> for details on how to
+contribute).
 
 Also, why not L<watch the repo|https://github.com/sukria/Dancer/toggle_watch> to
 keep up to date with the latest upcoming changes?
